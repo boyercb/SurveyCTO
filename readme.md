@@ -1,10 +1,12 @@
-CAI with SurveyCTO
+CAI with ODK/SurveyCTO
 ==================
 Instructors: Lindsey Shaughnessy and Christopher Boyer
+
 Location: Camp Yevneh, New Hampshire, USA.
+
 Dates: 24 - 28 August 2015
 
-Welcome to the *CAI with SurveyCTO* course sequence for the 2015 JPAL/IPA
+Welcome to the *CAI with ODK/SurveyCTO* course sequence for the 2015 JPAL/IPA
 Global Staff Training in New Hampshire. Included in this folder you will find
 all the files and programs necessary to complete the full course sequence, including:
 
