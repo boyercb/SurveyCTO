@@ -1,0 +1,907 @@
+{smcl}
+{txt}{sf}{ul off}{.-}
+      name:  {res}<unnamed>
+       {txt}log:  {res}C:\Users\cboyer.IPA\Box Sync\cboyer\global_staff_training\new_hampshire_2015\surveyCTO\exercises\4_data_quality\2_lab_answers\data and do-files\8.6 adv hfc modified template.smcl
+  {txt}log type:  {res}smcl
+ {txt}opened on:  {res}19 Aug 2015, 14:02:20
+{txt}
+{com}. 
+. ///////////////////////////////////////////////////////////////////////////
+> ///////////////////// Part 1: Interview Completeness //////////////////////
+> ///////////////////////////////////////////////////////////////////////////
+> 
+. /* 
+>    Let's check that all interviews were completed.
+>      - If an interview has no end time, the enumerator may have stopped
+>        midway through the interview, or may never have started it.
+> */
+. 
+. generate incomplete = missing(endtime)
+{txt}
+{com}. display "Displaying incomplete interviews:"
+{res}Displaying incomplete interviews:
+{txt}
+{com}. sort id  starttime
+{txt}
+{com}. list id  starttime r_enum if incomplete == 1
+{txt}
+      {c TLC}{hline 4}{c -}{hline 20}{c -}{hline 8}{c TRC}
+      {c |} {res}id            starttime   r_enum {txt}{c |}
+      {c LT}{hline 4}{c -}{hline 20}{c -}{hline 8}{c RT}
+   5. {c |} {res} 5   16jan2015 18:13:29    Sally {txt}{c |}
+  11. {c |} {res}10   03jan2015 06:32:59   George {txt}{c |}
+  57. {c |} {res}55   18apr2015 17:24:16   Esther {txt}{c |}
+      {c BLC}{hline 4}{c -}{hline 20}{c -}{hline 8}{c BRC}
+
+{com}. 
+. // QUESTION 1: HOW MANY INCOMPLETE INTERVIEWS ARE THERE?
+. // ANSWER: _____________
+. 
+. /* 
+>   Before we decide how to address the incomplete interviews, we have to get more
+>   information. Each incomplete interview should fall within one of three 
+>   distinct categories:
+>   (1) The incomplete interview does not have a corresponding complete
+>           interview.
+>                  - Action: Drop the incomplete interview. Additionally, determine
+>                    the cause of the incomplete interview, probably discussing with
+>                    your field team.
+>   (2) The incomplete interview has a corresponding complete interview, and
+>           the incomplete interview does not have a nonmissing value that
+>           differs from the value of the complete interview.
+>                  - Action: Drop the incomplete interview. If the incomplete
+>                    interview was started but immediately stopped, you probably
+>                    don't need to follow up with your team. However, if a
+>                    significant portion was completed, you should determine the
+>                    cause of the incomplete interview.
+>   (3) The incomplete interview has a corresponding complete interview, but
+>           the incomplete interview does have a nonmissing value that differs
+>           from the value of the complete interview.
+>                  - Action: Work closely with your team to determine which values
+>                    are correct.
+> */
+. 
+. // Possibility 1
+. bysort id: egen numcomplete = total(!incomplete)
+{txt}
+{com}. display "Displaying incomplete interviews that do not have a corresponding complete interview and will be dropped:"
+{res}Displaying incomplete interviews that do not have a corresponding complete interview and will be dropped:
+{txt}
+{com}. sort id  starttime
+{txt}
+{com}. list id  starttime r_enum if numcomplete == 0
+{txt}
+{com}. drop if numcomplete == 0
+{txt}(0 observations deleted)
+
+{com}. 
+. // Possibility 2
+. generate same = 1
+{txt}
+{com}. 
+. // continuous variables
+. ds  starttime endtime incomplete, not
+{txt}{col 1}id{col 14}r_cat{col 27}r_count{col 40}r_tx{col 53}consent{col 66}numcomplete
+{col 1}r_enum{col 14}r_cont{col 27}r_bin{col 40}duration{col 53}comment{col 66}same
+
+{com}. ds `r(varlist)', has(type numeric)
+{txt}{col 1}id{col 14}r_cat{col 27}r_count{col 40}r_tx{col 53}consent{col 66}same
+{col 1}r_enum{col 14}r_cont{col 27}r_bin{col 40}duration{col 53}numcomplete
+
+{com}. foreach var in `r(varlist)' {c -(}
+{txt}  2{com}.         generate incompletemiss = incomplete & `var' == .
+{txt}  3{com}.         bysort id incompletemiss (`var'): replace same = 0 if `var'[1] != `var'[_N]
+{txt}  4{com}.         drop incompletemiss
+{txt}  5{com}. {c )-}
+{txt}(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+{com}. 
+. // string variables
+. ds  starttime endtime incomplete, not
+{txt}{col 1}id{col 14}r_cat{col 27}r_count{col 40}r_tx{col 53}consent{col 66}numcomplete
+{col 1}r_enum{col 14}r_cont{col 27}r_bin{col 40}duration{col 53}comment{col 66}same
+
+{com}. ds `r(varlist)', has(type string)
+{txt}{col 1}comment
+
+{com}. foreach var in `r(varlist)' {c -(}
+{txt}  2{com}.         generate incompletemiss = incomplete & `var' == ""
+{txt}  3{com}.         bysort id incompletemiss (`var'): replace same = 0 if `var'[1] != `var'[_N]
+{txt}  4{com}.         drop incompletemiss
+{txt}  5{com}. {c )-}
+{txt}(0 real changes made)
+
+{com}. 
+. display "Displaying incomplete interviews that agree with their corresponding complete interview and will be dropped:"
+{res}Displaying incomplete interviews that agree with their corresponding complete interview and will be dropped:
+{txt}
+{com}. sort id  starttime
+{txt}
+{com}. list id  starttime r_enum if incomplete & same == 1
+{txt}
+      {c TLC}{hline 4}{c -}{hline 20}{c -}{hline 8}{c TRC}
+      {c |} {res}id            starttime   r_enum {txt}{c |}
+      {c LT}{hline 4}{c -}{hline 20}{c -}{hline 8}{c RT}
+   5. {c |} {res} 5   16jan2015 18:13:29    Sally {txt}{c |}
+  11. {c |} {res}10   03jan2015 06:32:59   George {txt}{c |}
+  57. {c |} {res}55   18apr2015 17:24:16   Esther {txt}{c |}
+      {c BLC}{hline 4}{c -}{hline 20}{c -}{hline 8}{c BRC}
+
+{com}. drop if incomplete & same == 1
+{txt}(3 observations deleted)
+
+{com}. 
+. * Possibility 3
+. display "Displaying incomplete interviews that disagree with their corresponding complete interview:"
+{res}Displaying incomplete interviews that disagree with their corresponding complete interview:
+{txt}
+{com}. sort id  starttime
+{txt}
+{com}. list id  starttime r_enum if incomplete & same == 0
+{txt}
+{com}. drop incomplete numcomplete same
+{txt}
+{com}. 
+. // QUESTION 2: WHAT HAPPENED? WHICH CASE DID OUR INCOMPLETE INTERVIEWS FALL IN TO?
+. // ANSWER: _____________
+. 
+. 
+. ///////////////////////////////////////////////////////////////////////////
+> //////////////////////// Part 2: Missing Values ///////////////////////////
+> ///////////////////////////////////////////////////////////////////////////
+> 
+. /*
+>   Check that certain variables have no missing values, where missing
+>   indicates a skip.
+>   
+>   Examples: 
+>     - The unique ID, name, other identifying information, survey date
+>       and time variables, the consent confirmation variable.
+>     - A variable at the start of a section often should never be
+>       missing.
+>   
+>   For simplicity, we'll check numeric and string variables separately.
+> */
+. 
+. foreach var of varlist ///
+>         id                                                                                              /* unique ID */ ///
+>         starttime endtime duration                          /* date and time variables */ ///
+>         consent                                                                                 /* consent variable */ ///
+>         {c -(}
+{txt}  2{com}.         display "Displaying interviews with missing values of `var':"
+{txt}  3{com}.         sort id starttime
+{txt}  4{com}.         list id starttime r_enum if `var' == .
+{txt}  5{com}. {c )-}
+Displaying interviews with missing values of id:
+Displaying interviews with missing values of starttime:
+Displaying interviews with missing values of endtime:
+Displaying interviews with missing values of duration:
+Displaying interviews with missing values of consent:
+{txt}
+{com}. 
+. /*
+>   Check the percentage of missing values for each variable, where missing
+>   indicates a skip.
+> */
+. 
+. display "Displaying percent missing..."
+{res}Displaying percent missing...
+{txt}
+{com}. quietly ds, has(type numeric)
+{txt}
+{com}. foreach var in `r(varlist)' {c -(}
+{txt}  2{com}.         quietly count if `var' == .
+{txt}  3{com}.         * See -help format- for what "%5.1f" means.
+.         display "`var':" _column(35) string(100 * r(N) / _N, "%5.1f") "%"
+{txt}  4{com}. {c )-}
+id:{col 35}0.0%
+r_enum:{col 35}0.0%
+r_cat:{col 35}9.6%
+r_cont:{col 35}0.0%
+r_count:{col 35}0.0%
+r_bin:{col 35}0.0%
+r_tx:{col 35}0.0%
+starttime:{col 35}0.0%
+endtime:{col 35}0.0%
+duration:{col 35}0.0%
+consent:{col 35}0.0%
+{txt}
+{com}. quietly ds, has(type string)
+{txt}
+{com}. foreach var in `r(varlist)' {c -(}
+{txt}  2{com}.         quietly count if `var' == ""
+{txt}  3{com}.         display "`var':" _column(35) string(100 * r(N) / _N, "%5.1f") "%"
+{txt}  4{com}. {c )-}
+comment:{col 35}99.3%
+{txt}
+{com}. 
+. // QUESTION 3: WHICH VARIABLES HAVE HIGH RATES OF MISSING RESPONSES?
+. // ANSWER: _____________
+. 
+. 
+. ///////////////////////////////////////////////////////////////////////////
+> /////////////////////// Part 3: Unique IDs Check //////////////////////////
+> ///////////////////////////////////////////////////////////////////////////
+> 
+. // Check that the unique ID is actually unique.
+. 
+. duplicates tag id, generate(dup)
+
+{p 0 4}{txt}Duplicates in terms of {res} id{p_end}
+{txt}
+{com}. display "Displaying unique ID duplicates:"
+{res}Displaying unique ID duplicates:
+{txt}
+{com}. sort id starttime
+{txt}
+{com}. list id starttime r_enum if dup > 0
+{txt}
+{com}. drop dup
+{txt}
+{com}. 
+. /*
+>   We could also check that a survey matches other records for its unique ID.
+>   Examples:
+>     - For a follow up survey we could check that, for each id, the name in the 
+>           baseline data matches the one in the master tracking list.
+>         - We could check additional unique id's (govt id, ssn, etc.) that are not 
+>           the survey id.
+>         - We could check unique combinations of variables
+> */
+. 
+. 
+. // Now that these checks have been completed, the following command should
+. // be successful:
+. 
+. isid id
+{txt}
+{com}. 
+. 
+. ///////////////////////////////////////////////////////////////////////////
+> ////////////////// Part 4: Routing and Logic Checks ///////////////////////
+> ///////////////////////////////////////////////////////////////////////////
+> 
+. /*
+>   Double-check important routing instructions (skip patterns):
+> 
+>     In this survey, the respondent must first consent to being interview before
+>   proceeding with the rest of the survey. This consent is recorded in the 
+>   consent variable. Respondents who do not give express consent should not be 
+>   interviewed. This is easier to enforce with CAI, but sometimes it's good 
+>   practice to check anyway.
+> */
+. display "Displaying respondents with consent violations:"
+{res}Displaying respondents with consent violations:
+{txt}
+{com}. sort id
+{txt}
+{com}. list id starttime r_enum if consent == 0 & inlist(0, missing(r_cont),  ///
+>                                                      missing(r_count), ///
+>                                                                                                          missing(r_bin),   ///
+>                                                                                                          missing(r_cat))
+{txt}
+      {c TLC}{hline 6}{c -}{hline 20}{c -}{hline 8}{c TRC}
+      {c |} {res}  id            starttime   r_enum {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 20}{c -}{hline 8}{c RT}
+1776. {c |} {res}1776   06apr2015 14:16:44   George {txt}{c |}
+      {c BLC}{hline 6}{c -}{hline 20}{c -}{hline 8}{c BRC}
+
+{com}. 
+. // QUESTION 4: ARE THERE ANY CONSENT VIOLATIONS? IF SO DROP THEM!
+. // ANSWER: _____________
+. 
+. drop if consent == 0
+{txt}(1 observation deleted)
+
+{com}. 
+. /* 
+>   You can use similar code for the following checks:
+>     - Double-check important hard checks.
+>     - If the CAI survey program calculates a field using other fields, check in
+>       Stata that the calculated variable is consistent with the other variables.
+>     - Logic checks not implemented in the CAI survey program
+> */
+. 
+. 
+. ///////////////////////////////////////////////////////////////////////////
+> ///////////////////////// Part 5: Date Checks /////////////////////////////
+> ///////////////////////////////////////////////////////////////////////////
+> 
+. * Check that interview start date and interview end date are the same.
+. 
+. display "Displaying unequal start and end dates:"
+{res}Displaying unequal start and end dates:
+{txt}
+{com}. sort id
+{txt}
+{com}. list id starttime endtime if dofc(starttime) != dofc(endtime)
+{txt}
+      {c TLC}{hline 6}{c -}{hline 20}{c -}{hline 20}{c TRC}
+      {c |} {res}  id            starttime              endtime {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 20}{c -}{hline 20}{c RT}
+  26. {c |} {res}  26   28apr2015 23:42:38   29apr2015 00:02:18 {txt}{c |}
+ 199. {c |} {res} 199   03mar2015 23:51:31   04mar2015 00:06:48 {txt}{c |}
+ 316. {c |} {res} 316   11jun2015 23:53:46   12jun2015 00:11:14 {txt}{c |}
+ 347. {c |} {res} 347   16mar2015 23:44:13   17mar2015 00:08:15 {txt}{c |}
+ 381. {c |} {res} 381   04feb2015 23:44:38   05feb2015 00:04:18 {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 20}{c -}{hline 20}{c RT}
+ 420. {c |} {res} 420   20jan2015 23:48:20   21jan2015 00:08:00 {txt}{c |}
+ 446. {c |} {res} 446   19jan2015 23:44:22   20jan2015 00:06:12 {txt}{c |}
+ 528. {c |} {res} 528   11jan2015 23:56:14   12jan2015 00:20:16 {txt}{c |}
+ 643. {c |} {res} 643   05mar2015 23:55:06   06mar2015 00:10:23 {txt}{c |}
+ 653. {c |} {res} 653   22apr2015 23:42:48   23apr2015 00:00:17 {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 20}{c -}{hline 20}{c RT}
+ 755. {c |} {res} 755   28jun2015 23:38:21   29jun2015 00:00:12 {txt}{c |}
+ 769. {c |} {res} 769   11apr2015 23:55:52   12apr2015 00:11:09 {txt}{c |}
+ 862. {c |} {res} 862   06apr2015 23:51:16   07apr2015 00:10:56 {txt}{c |}
+ 912. {c |} {res} 912   27mar2015 23:50:50   28mar2015 00:08:18 {txt}{c |}
+ 984. {c |} {res} 984   13feb2015 23:47:39   14feb2015 00:09:30 {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 20}{c -}{hline 20}{c RT}
+1108. {c |} {res}1108   05aug2015 23:40:55   06aug2015 00:02:45 {txt}{c |}
+1124. {c |} {res}1124   26mar2015 23:49:02   27mar2015 00:06:31 {txt}{c |}
+1196. {c |} {res}1196   24mar2015 23:47:38   25mar2015 00:11:40 {txt}{c |}
+1214. {c |} {res}1214   06may2015 23:59:09   07may2015 00:16:38 {txt}{c |}
+1299. {c |} {res}1299   23jul2015 23:46:01   24jul2015 00:10:03 {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 20}{c -}{hline 20}{c RT}
+1355. {c |} {res}1355   02jun2015 23:42:00   03jun2015 00:08:13 {txt}{c |}
+1462. {c |} {res}1462   26jul2015 23:55:46   27jul2015 00:17:36 {txt}{c |}
+1502. {c |} {res}1502   14jun2015 23:41:40   15jun2015 00:03:30 {txt}{c |}
+1519. {c |} {res}1519   16jan2015 23:38:59   17jan2015 00:03:01 {txt}{c |}
+1559. {c |} {res}1559   15may2015 23:57:48   16may2015 00:21:50 {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 20}{c -}{hline 20}{c RT}
+1698. {c |} {res}1698   30jun2015 23:46:18   01jul2015 00:10:20 {txt}{c |}
+1713. {c |} {res}1713   03may2015 23:45:02   04may2015 00:02:31 {txt}{c |}
+1747. {c |} {res}1747   09aug2015 23:50:16   10aug2015 00:07:44 {txt}{c |}
+1810. {c |} {res}1811   15jan2015 23:41:34   16jan2015 00:01:13 {txt}{c |}
+1859. {c |} {res}1860   09may2015 23:42:41   10may2015 00:02:21 {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 20}{c -}{hline 20}{c RT}
+1927. {c |} {res}1928   05aug2015 23:51:50   06aug2015 00:09:19 {txt}{c |}
+2043. {c |} {res}2044   10feb2015 23:51:01   11feb2015 00:10:41 {txt}{c |}
+2099. {c |} {res}2100   03may2015 23:45:02   04may2015 00:06:53 {txt}{c |}
+2231. {c |} {res}2232   14jun2015 23:41:40   15jun2015 00:03:30 {txt}{c |}
+2237. {c |} {res}2238   17jul2015 23:44:00   18jul2015 00:10:13 {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 20}{c -}{hline 20}{c RT}
+2545. {c |} {res}2546   07jan2015 23:40:20   08jan2015 00:00:00 {txt}{c |}
+2655. {c |} {res}2656   31jan2015 23:57:07   01feb2015 00:18:58 {txt}{c |}
+2742. {c |} {res}2743   10feb2015 23:42:17   11feb2015 00:06:18 {txt}{c |}
+2782. {c |} {res}2783   22jan2015 23:49:44   23jan2015 00:07:13 {txt}{c |}
+2836. {c |} {res}2837   15jul2015 23:40:25   16jul2015 00:02:16 {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 20}{c -}{hline 20}{c RT}
+2905. {c |} {res}2906   20jul2015 23:55:56   21jul2015 00:11:13 {txt}{c |}
+2920. {c |} {res}2921   28jun2015 23:38:21   29jun2015 00:00:12 {txt}{c |}
+2967. {c |} {res}2968   04aug2015 23:54:25   05aug2015 00:16:15 {txt}{c |}
+      {c BLC}{hline 6}{c -}{hline 20}{c -}{hline 20}{c BRC}
+
+{com}. 
+. // QUESTION 5: ARE THERE ANY DATES THAT ARE NOT THE SAME? ARE THEY REASONABLE?
+. // ANSWER: _____________
+. 
+. ***************************************************************************
+. * Interview date should not be before the start of data collection.
+. 
+. * In this survey, the start of data collection was January 1, 2015.
+. 
+. display "Displaying interviews before the start of data collection:"
+{res}Displaying interviews before the start of data collection:
+{txt}
+{com}. sort id
+{txt}
+{com}. list id starttime if starttime < mdy(1, 1, 2015)
+{txt}
+{com}. 
+. 
+. ***************************************************************************
+. * Interview date should not be after the system date.
+. 
+. display "Displaying interviews after the system date:"
+{res}Displaying interviews after the system date:
+{txt}
+{com}. sort id
+{txt}
+{com}. list id starttime if starttime > date(c(current_date), "DMYhms")
+{txt}
+{com}. 
+. 
+. ///////////////////////////////////////////////////////////////////////////
+> ///////////////////// Part 6: Outliers/Dist. Check ////////////////////////
+> ///////////////////////////////////////////////////////////////////////////
+> 
+. // a. Check that no variable has only a single distinct value.
+. 
+. foreach var of varlist _all {c -(}
+{txt}  2{com}.         quietly tabulate `var'
+{txt}  3{com}.         if r(r) == 1 {c -(}
+{txt}  4{com}.                 display "`var' has only one distinct value."
+{txt}  5{com}.                 describe `var'
+{txt}  6{com}.         {c )-}
+{txt}  7{com}. {c )-}
+consent has only one distinct value.
+
+              {txt}storage   display    value
+variable name   type    format     label      variable label
+{hline}
+{p 0 48}{res}{bind:consent        }{txt}{bind: float   }{bind:{txt}%9.0g     }{space 1}{bind:lconsent }{bind:  }{res}{res}{p_end}
+{txt}
+{com}. 
+. /*
+>   b. Check for outliers.
+> 
+>   You probably do not need to check for outliers for variables that have
+>   hard range limits (constraints) in the CAI survey program. In most cases, any
+>   response in this range is already considered reasonable.
+> 
+>   However, in this survey we didn't use any hard range limits for weekly
+>   income, probably a mistake. We'll check for outliers by looking for
+>   incomes that are 3 standard deviations from the mean.
+> 
+>   In general, you should not drop outliers from the data. Variation is
+>   exactly what we're hoping to measure, and there will likely be some
+>   outliers just naturally. Contact your PI for further guidance on how to
+>   manage outliers.
+> */
+. 
+. egen mean = mean(r_cont)
+{txt}
+{com}. egen sd = sd(r_cont)
+{txt}
+{com}. generate sds = (r_cont - mean) / sd
+{txt}
+{com}. format mean sd sds %9.2f
+{txt}
+{com}. display "Displaying r_cont outliers:"
+{res}Displaying r_cont outliers:
+{txt}
+{com}. sort id
+{txt}
+{com}. list id r_cont mean sd sds if abs(sds) > 3 & !missing(sds)
+{txt}
+      {c TLC}{hline 6}{c -}{hline 10}{c -}{hline 7}{c -}{hline 8}{c -}{hline 7}{c TRC}
+      {c |} {res}  id     r_cont    mean       sd     sds {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 10}{c -}{hline 7}{c -}{hline 8}{c -}{hline 7}{c RT}
+1723. {c |} {res}1723   658.2657   66.05   123.54    4.79 {txt}{c |}
+1789. {c |} {res}1790   6799.432   66.05   123.54   54.50 {txt}{c |}
+      {c BLC}{hline 6}{c -}{hline 10}{c -}{hline 7}{c -}{hline 8}{c -}{hline 7}{c BRC}
+
+{com}. // code inserted here!
+. drop if abs(sds) > 3 & !missing(sds)
+{txt}(2 observations deleted)
+
+{com}. drop mean sd sds
+{txt}
+{com}. 
+. // QUESTION 6: ARE THERE ANY OBVIOUS OUTLIERS? (IF SO DROP THEM)
+. // ANSWER: _____________
+. 
+. 
+. ///////////////////////////////////////////////////////////////////////////
+> ////////////////////// Part 7: Enumerator Checks //////////////////////////
+> ///////////////////////////////////////////////////////////////////////////
+> 
+. // a. Review the enumerator comments variable.
+. 
+. sort id
+{txt}
+{com}. list id starttime r_enum comment if !missing(comment)
+{txt}
+      {c TLC}{hline 6}{c -}{hline 20}{c -}{hline 8}{c -}{hline 35}{c TRC}
+      {c |} {res}  id            starttime   r_enum                             comment {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 20}{c -}{hline 8}{c -}{hline 35}{c RT}
+ 140. {c |} {res} 140   03feb2015 13:07:08     Nina                          Pilot Test {txt}{c |}
+ 280. {c |} {res} 280   10jul2015 03:12:29     Nina                          Pilot Test {txt}{c |}
+ 560. {c |} {res} 560   10jun2015 00:27:19   George                          Pilot Test {txt}{c |}
+ 630. {c |} {res} 630   06jan2015 03:54:31     Nina                          Pilot Test {txt}{c |}
+ 700. {c |} {res} 700   26mar2015 08:24:59   Olivia                          Pilot Test {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 20}{c -}{hline 8}{c -}{hline 35}{c RT}
+ 840. {c |} {res} 840   07feb2015 17:08:03   George                          Pilot Test {txt}{c |}
+ 980. {c |} {res} 980   07aug2015 06:02:49     Nina                          Pilot Test {txt}{c |}
+1190. {c |} {res}1190   01jun2015 08:42:22     Nina                          Pilot Test {txt}{c |}
+1330. {c |} {res}1330   15jul2015 09:52:29    Sally                          Pilot Test {txt}{c |}
+1470. {c |} {res}1470   07may2015 14:15:30   George                          Pilot Test {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 20}{c -}{hline 8}{c -}{hline 35}{c RT}
+1680. {c |} {res}1680   13jan2015 16:49:28    Sally                          Pilot Test {txt}{c |}
+1862. {c |} {res}1865   02jan2015 00:54:47   Esther   Just playing around with software {txt}{c |}
+2097. {c |} {res}2100   03may2015 23:45:02    Sally                          Pilot Test {txt}{c |}
+2167. {c |} {res}2170   03may2015 01:25:55   Esther                          Pilot Test {txt}{c |}
+2237. {c |} {res}2240   24jul2015 09:40:12     Nina                          Pilot Test {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 20}{c -}{hline 8}{c -}{hline 35}{c RT}
+2307. {c |} {res}2310   22feb2015 02:56:45   George                          Pilot Test {txt}{c |}
+2377. {c |} {res}2380   07jul2015 05:24:44    Sally                          Pilot Test {txt}{c |}
+2587. {c |} {res}2590   23jan2015 04:05:20   Esther                          Pilot Test {txt}{c |}
+2657. {c |} {res}2660   14feb2015 05:37:11   Olivia                          Pilot Test {txt}{c |}
+2797. {c |} {res}2800   29jun2015 04:42:00   George                          Pilot Test {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 20}{c -}{hline 8}{c -}{hline 35}{c RT}
+2867. {c |} {res}2870   03may2015 18:21:44   George                          Pilot Test {txt}{c |}
+      {c BLC}{hline 6}{c -}{hline 20}{c -}{hline 8}{c -}{hline 35}{c BRC}
+
+{com}. 
+. // QUESTION 7: ARE THERE ANY CAUSES FOR CONCERN? WHAT SHOULD YOU DO?
+. // ANSWER: _____________
+. 
+. drop if comment != ""
+{txt}(21 observations deleted)
+
+{com}. 
+. // b. Check average interview duration by enumerator.
+. bysort r_enum: egen avgdur = mean(duration / 60000) // 60000 to convert to ms
+{txt}
+{com}. egen mean = mean(duration / 60000)                      // overal avg.
+{txt}
+{com}. generate diff = avgdur - mean                           // diff btw avg and mean
+{txt}
+{com}. generate percdiff = 100 * diff / mean                   // % diff
+{txt}
+{com}. egen sd = sd(duration / 60000)                          // standard dev.
+{txt}
+{com}. generate sds = diff / sd                                // # std from mean
+{txt}
+{com}. format avgdur mean diff percdiff sd %9.1f
+{txt}
+{com}. format sds %9.2f
+{txt}
+{com}. egen tag = tag(r_enum)
+{txt}
+{com}. 
+. display "Displaying interview duration averages by r_enum:"
+{res}Displaying interview duration averages by r_enum:
+{txt}
+{com}. sort r_enum
+{txt}
+{com}. list r_enum avgdur mean diff percdiff sd sds if tag
+{txt}
+      {c TLC}{hline 8}{c -}{hline 8}{c -}{hline 6}{c -}{hline 6}{c -}{hline 10}{c -}{hline 5}{c -}{hline 7}{c TRC}
+      {c |} {res}r_enum   avgdur   mean   diff   percdiff    sd     sds {txt}{c |}
+      {c LT}{hline 8}{c -}{hline 8}{c -}{hline 6}{c -}{hline 6}{c -}{hline 10}{c -}{hline 5}{c -}{hline 7}{c RT}
+   1. {c |} {res}George      0.0    0.0   -0.0       -0.3   0.0   -0.02 {txt}{c |}
+ 636. {c |} {res} Sally      0.0    0.0    0.0        0.2   0.0    0.01 {txt}{c |}
+1201. {c |} {res}Esther      0.0    0.0   -0.0       -0.3   0.0   -0.02 {txt}{c |}
+1751. {c |} {res}  Nina      0.0    0.0   -0.0       -0.0   0.0   -0.00 {txt}{c |}
+2368. {c |} {res}Olivia      0.0    0.0    0.0        0.5   0.0    0.03 {txt}{c |}
+      {c BLC}{hline 8}{c -}{hline 8}{c -}{hline 6}{c -}{hline 6}{c -}{hline 10}{c -}{hline 5}{c -}{hline 7}{c BRC}
+
+{com}. drop avgdur mean diff percdiff sd sds tag
+{txt}
+{com}. 
+. // QUESTION 8: ARE THERE SIGNIFICANT DIFFERENCES IN ENUMERATOR TIMES? WHAT ARE 
+. //             SOME POTENTIAL REASONS FOR THESE DIFFERENCES?
+. // ANSWER: _____________
+. 
+. // note: you can use similar code to check avg section durations by enumerator.
+. 
+. 
+. /* 
+>    c. Check for unusually short or long interview durations.
+> 
+>    Here, we'll define "unusually short or long" as 2 standard deviations
+>    from the mean, knowing that this might list too many interviews.
+> */
+. egen mean = mean(duration / 60000)
+{txt}
+{com}. egen sd = sd(duration / 60000)
+{txt}
+{com}. generate sds = (duration / 60000 - mean) / sd
+{txt}
+{com}. format mean sd %9.1f
+{txt}
+{com}. format sds %9.2f
+{txt}
+{com}. 
+. display "Displaying unusually short or long interviews:"
+{res}Displaying unusually short or long interviews:
+{txt}
+{com}. sort r_enum
+{txt}
+{com}. list r_enum duration mean sd sds if abs(sds) > 2 & !missing(sds)
+{txt}
+      {c TLC}{hline 8}{c -}{hline 10}{c -}{hline 6}{c -}{hline 5}{c -}{hline 7}{c TRC}
+      {c |} {res}r_enum   duration   mean    sd     sds {txt}{c |}
+      {c LT}{hline 8}{c -}{hline 10}{c -}{hline 6}{c -}{hline 5}{c -}{hline 7}{c RT}
+   8. {c |} {res}George   28.39893    0.0   0.0    2.41 {txt}{c |}
+  43. {c |} {res}George   28.39893    0.0   0.0    2.41 {txt}{c |}
+  63. {c |} {res}George   28.39893    0.0   0.0    2.41 {txt}{c |}
+  88. {c |} {res}George   28.39893    0.0   0.0    2.41 {txt}{c |}
+ 134. {c |} {res}George   28.39893    0.0   0.0    2.41 {txt}{c |}
+      {c LT}{hline 8}{c -}{hline 10}{c -}{hline 6}{c -}{hline 5}{c -}{hline 7}{c RT}
+ 192. {c |} {res}George   28.39893    0.0   0.0    2.41 {txt}{c |}
+ 209. {c |} {res}George   10.92267    0.0   0.0   -2.61 {txt}{c |}
+ 222. {c |} {res}George   8.738133    0.0   0.0   -3.23 {txt}{c |}
+ 225. {c |} {res}George   28.39893    0.0   0.0    2.41 {txt}{c |}
+ 285. {c |} {res}George   28.39893    0.0   0.0    2.41 {txt}{c |}
+      {c LT}{hline 8}{c -}{hline 10}{c -}{hline 6}{c -}{hline 5}{c -}{hline 7}{c RT}
+ 290. {c |} {res}George   10.92267    0.0   0.0   -2.61 {txt}{c |}
+ 322. {c |} {res}George   10.92267    0.0   0.0   -2.61 {txt}{c |}
+ 402. {c |} {res}George   10.92267    0.0   0.0   -2.61 {txt}{c |}
+ 415. {c |} {res}George   28.39893    0.0   0.0    2.41 {txt}{c |}
+ 454. {c |} {res}George   10.92267    0.0   0.0   -2.61 {txt}{c |}
+      {c LT}{hline 8}{c -}{hline 10}{c -}{hline 6}{c -}{hline 5}{c -}{hline 7}{c RT}
+ 504. {c |} {res}George   28.39893    0.0   0.0    2.41 {txt}{c |}
+ 529. {c |} {res}George   10.92267    0.0   0.0   -2.61 {txt}{c |}
+ 642. {c |} {res} Sally   30.58347    0.0   0.0    3.03 {txt}{c |}
+ 745. {c |} {res} Sally   28.39893    0.0   0.0    2.41 {txt}{c |}
+ 771. {c |} {res} Sally   30.58347    0.0   0.0    3.03 {txt}{c |}
+      {c LT}{hline 8}{c -}{hline 10}{c -}{hline 6}{c -}{hline 5}{c -}{hline 7}{c RT}
+ 793. {c |} {res} Sally   28.39893    0.0   0.0    2.41 {txt}{c |}
+ 812. {c |} {res} Sally   1.456356    0.0   0.0   -5.32 {txt}{c |}
+ 928. {c |} {res} Sally   28.39893    0.0   0.0    2.41 {txt}{c |}
+ 937. {c |} {res} Sally   28.39893    0.0   0.0    2.41 {txt}{c |}
+1038. {c |} {res} Sally     32.768    0.0   0.0    3.66 {txt}{c |}
+      {c LT}{hline 8}{c -}{hline 10}{c -}{hline 6}{c -}{hline 5}{c -}{hline 7}{c RT}
+1089. {c |} {res} Sally   28.39893    0.0   0.0    2.41 {txt}{c |}
+1090. {c |} {res} Sally   28.39893    0.0   0.0    2.41 {txt}{c |}
+1184. {c |} {res} Sally   10.92267    0.0   0.0   -2.61 {txt}{c |}
+1264. {c |} {res}Esther   30.58347    0.0   0.0    3.03 {txt}{c |}
+1318. {c |} {res}Esther   10.92267    0.0   0.0   -2.61 {txt}{c |}
+      {c LT}{hline 8}{c -}{hline 10}{c -}{hline 6}{c -}{hline 5}{c -}{hline 7}{c RT}
+1363. {c |} {res}Esther   30.58347    0.0   0.0    3.03 {txt}{c |}
+1383. {c |} {res}Esther   28.39893    0.0   0.0    2.41 {txt}{c |}
+1388. {c |} {res}Esther   28.39893    0.0   0.0    2.41 {txt}{c |}
+1408. {c |} {res}Esther   28.39893    0.0   0.0    2.41 {txt}{c |}
+1427. {c |} {res}Esther   10.92267    0.0   0.0   -2.61 {txt}{c |}
+      {c LT}{hline 8}{c -}{hline 10}{c -}{hline 6}{c -}{hline 5}{c -}{hline 7}{c RT}
+1435. {c |} {res}Esther   28.39893    0.0   0.0    2.41 {txt}{c |}
+1500. {c |} {res}Esther   28.39893    0.0   0.0    2.41 {txt}{c |}
+1517. {c |} {res}Esther   10.92267    0.0   0.0   -2.61 {txt}{c |}
+1530. {c |} {res}Esther     1.6384    0.0   0.0   -5.27 {txt}{c |}
+1623. {c |} {res}Esther     32.768    0.0   0.0    3.66 {txt}{c |}
+      {c LT}{hline 8}{c -}{hline 10}{c -}{hline 6}{c -}{hline 5}{c -}{hline 7}{c RT}
+1632. {c |} {res}Esther   28.39893    0.0   0.0    2.41 {txt}{c |}
+1636. {c |} {res}Esther   1.274311    0.0   0.0   -5.37 {txt}{c |}
+1679. {c |} {res}Esther   10.92267    0.0   0.0   -2.61 {txt}{c |}
+1696. {c |} {res}Esther   10.92267    0.0   0.0   -2.61 {txt}{c |}
+1751. {c |} {res}  Nina   30.58347    0.0   0.0    3.03 {txt}{c |}
+      {c LT}{hline 8}{c -}{hline 10}{c -}{hline 6}{c -}{hline 5}{c -}{hline 7}{c RT}
+1772. {c |} {res}  Nina   10.92267    0.0   0.0   -2.61 {txt}{c |}
+1886. {c |} {res}  Nina   28.39893    0.0   0.0    2.41 {txt}{c |}
+1892. {c |} {res}  Nina   10.92267    0.0   0.0   -2.61 {txt}{c |}
+1899. {c |} {res}  Nina   10.92267    0.0   0.0   -2.61 {txt}{c |}
+1943. {c |} {res}  Nina   30.58347    0.0   0.0    3.03 {txt}{c |}
+      {c LT}{hline 8}{c -}{hline 10}{c -}{hline 6}{c -}{hline 5}{c -}{hline 7}{c RT}
+1956. {c |} {res}  Nina   10.92267    0.0   0.0   -2.61 {txt}{c |}
+2015. {c |} {res}  Nina   28.39893    0.0   0.0    2.41 {txt}{c |}
+2041. {c |} {res}  Nina   10.92267    0.0   0.0   -2.61 {txt}{c |}
+2068. {c |} {res}  Nina   30.58347    0.0   0.0    3.03 {txt}{c |}
+2091. {c |} {res}  Nina   28.39893    0.0   0.0    2.41 {txt}{c |}
+      {c LT}{hline 8}{c -}{hline 10}{c -}{hline 6}{c -}{hline 5}{c -}{hline 7}{c RT}
+2111. {c |} {res}  Nina   28.39893    0.0   0.0    2.41 {txt}{c |}
+2127. {c |} {res}  Nina   10.92267    0.0   0.0   -2.61 {txt}{c |}
+2195. {c |} {res}  Nina   10.92267    0.0   0.0   -2.61 {txt}{c |}
+2344. {c |} {res}  Nina   10.92267    0.0   0.0   -2.61 {txt}{c |}
+2380. {c |} {res}Olivia   28.39893    0.0   0.0    2.41 {txt}{c |}
+      {c LT}{hline 8}{c -}{hline 10}{c -}{hline 6}{c -}{hline 5}{c -}{hline 7}{c RT}
+2423. {c |} {res}Olivia   28.39893    0.0   0.0    2.41 {txt}{c |}
+2460. {c |} {res}Olivia   28.39893    0.0   0.0    2.41 {txt}{c |}
+2462. {c |} {res}Olivia   10.92267    0.0   0.0   -2.61 {txt}{c |}
+2482. {c |} {res}Olivia   28.39893    0.0   0.0    2.41 {txt}{c |}
+2548. {c |} {res}Olivia   28.39893    0.0   0.0    2.41 {txt}{c |}
+      {c LT}{hline 8}{c -}{hline 10}{c -}{hline 6}{c -}{hline 5}{c -}{hline 7}{c RT}
+2558. {c |} {res}Olivia   30.58347    0.0   0.0    3.03 {txt}{c |}
+2625. {c |} {res}Olivia   28.39893    0.0   0.0    2.41 {txt}{c |}
+2665. {c |} {res}Olivia   10.92267    0.0   0.0   -2.61 {txt}{c |}
+2727. {c |} {res}Olivia   28.39893    0.0   0.0    2.41 {txt}{c |}
+2762. {c |} {res}Olivia   28.39893    0.0   0.0    2.41 {txt}{c |}
+      {c LT}{hline 8}{c -}{hline 10}{c -}{hline 6}{c -}{hline 5}{c -}{hline 7}{c RT}
+2770. {c |} {res}Olivia   1.820444    0.0   0.0   -5.22 {txt}{c |}
+2856. {c |} {res}Olivia   28.39893    0.0   0.0    2.41 {txt}{c |}
+2861. {c |} {res}Olivia   28.39893    0.0   0.0    2.41 {txt}{c |}
+2865. {c |} {res}Olivia   10.92267    0.0   0.0   -2.61 {txt}{c |}
+2949. {c |} {res}Olivia   10.92267    0.0   0.0   -2.61 {txt}{c |}
+      {c LT}{hline 8}{c -}{hline 10}{c -}{hline 6}{c -}{hline 5}{c -}{hline 7}{c RT}
+2969. {c |} {res}Olivia   28.39893    0.0   0.0    2.41 {txt}{c |}
+      {c BLC}{hline 8}{c -}{hline 10}{c -}{hline 6}{c -}{hline 5}{c -}{hline 7}{c BRC}
+
+{com}. drop mean sd sds
+{txt}
+{com}. 
+. // note: use similar code to check for unusually short or long section durations.
+. 
+. /*
+>   d. Check enumerator productivity 
+>   
+>   Here we define productivity as the number of interviews completed and
+>   number of responses entered. Different productivity levels do not necessarily
+>   indicate foul play, be sure to check with field managers who can provide insights
+>   into geographic and cultural difficulties that can drive differences in 
+>   productivity. Also, note that outlier observations will affect these avgs.
+>   
+> */
+. bysort r_enum: generate interviews = _N
+{txt}
+{com}. 
+. generate nonmiss = 0
+{txt}
+{com}. quietly ds, has(type numeric)
+{txt}
+{com}. foreach var in `r(varlist)' {c -(}
+{txt}  2{com}.         replace nonmiss = nonmiss + cond(`var' != ., 1, 0)
+{txt}  3{com}. {c )-}
+{txt}(2976 real changes made)
+(2976 real changes made)
+(2691 real changes made)
+(2976 real changes made)
+(2976 real changes made)
+(2976 real changes made)
+(2976 real changes made)
+(2976 real changes made)
+(2976 real changes made)
+(2976 real changes made)
+(2976 real changes made)
+(2976 real changes made)
+(2976 real changes made)
+
+{com}. quietly ds, has(type string)
+{txt}
+{com}. foreach var in `r(varlist)' {c -(}
+{txt}  2{com}.         replace nonmiss = nonmiss + cond(`var' != "", 1, 0)
+{txt}  3{com}. {c )-}
+{txt}(0 real changes made)
+
+{com}. bysort r_enum: egen responses = total(nonmiss)
+{txt}
+{com}. drop nonmiss
+{txt}
+{com}. 
+. egen tag = tag(r_enum)
+{txt}
+{com}. 
+. foreach stat in interviews responses {c -(}
+{txt}  2{com}.         egen mean = mean(`stat')
+{txt}  3{com}.         generate diff = `stat' - mean
+{txt}  4{com}.         generate percdiff = 100 * diff / mean
+{txt}  5{com}.         format mean diff percdiff %9.1f
+{txt}  6{com}.         
+.         display "Displaying number of `stat' by r_enum:"
+{txt}  7{com}.         sort r_enum
+{txt}  8{com}.         list r_enum `stat' mean diff percdiff if tag
+{txt}  9{com}.         drop mean diff percdiff
+{txt} 10{com}. {c )-}
+Displaying number of interviews by r_enum:
+{txt}
+      {c TLC}{hline 8}{c -}{hline 10}{c -}{hline 7}{c -}{hline 7}{c -}{hline 10}{c TRC}
+      {c |} {res}r_enum   interv~s    mean    diff   percdiff {txt}{c |}
+      {c LT}{hline 8}{c -}{hline 10}{c -}{hline 7}{c -}{hline 7}{c -}{hline 10}{c RT}
+   1. {c |} {res}George        635   596.9    38.1        6.4 {txt}{c |}
+ 636. {c |} {res} Sally        565   596.9   -31.9       -5.4 {txt}{c |}
+1201. {c |} {res}Esther        550   596.9   -46.9       -7.9 {txt}{c |}
+1751. {c |} {res}  Nina        617   596.9    20.1        3.4 {txt}{c |}
+2368. {c |} {res}Olivia        609   596.9    12.1        2.0 {txt}{c |}
+      {c BLC}{hline 8}{c -}{hline 10}{c -}{hline 7}{c -}{hline 7}{c -}{hline 10}{c BRC}
+Displaying number of responses by r_enum:
+
+      {c TLC}{hline 8}{c -}{hline 10}{c -}{hline 8}{c -}{hline 8}{c -}{hline 10}{c TRC}
+      {c |} {res}r_enum   respon~s     mean     diff   percdiff {txt}{c |}
+      {c LT}{hline 8}{c -}{hline 10}{c -}{hline 8}{c -}{hline 8}{c -}{hline 10}{c RT}
+   1. {c |} {res}George       8255   7707.7    547.3        7.1 {txt}{c |}
+ 636. {c |} {res} Sally       7345   7707.7   -362.7       -4.7 {txt}{c |}
+1201. {c |} {res}Esther       6865   7707.7   -842.7      -10.9 {txt}{c |}
+1751. {c |} {res}  Nina       8021   7707.7    313.3        4.1 {txt}{c |}
+2368. {c |} {res}Olivia       7917   7707.7    209.3        2.7 {txt}{c |}
+      {c BLC}{hline 8}{c -}{hline 10}{c -}{hline 8}{c -}{hline 8}{c -}{hline 10}{c BRC}
+
+{com}. 
+. drop interviews responses tag
+{txt}
+{com}. 
+. /*
+>   e. Check enumerator effects on key variables.
+> 
+>   At IPA HQ, we're still trying to figure out the best way to measure
+>   enumerator fixed effects on key variables. For instance, how do we best
+>   control for the fact that enumerators are often assigned to different
+>   enumeration areas, so differences in key variables across enumerators
+>   could just be due to regional differences? If you have ideas, please
+>   e-mail us!
+> 
+>   That said, the following is a start. There are no controls for
+>   enumeration area, etc., so you might have to take the results with a
+>   grain of salt. However, if you see significant fixed effects, it's
+>   probably cause for further investigation.
+>   
+>   NOTE: if prior to Stata 11 use xi: before regress commands
+> */
+. 
+. regress r_cont i.r_enum
+
+      {txt}Source {c |}       SS       df       MS              Number of obs ={res}    2976
+{txt}{hline 13}{char +}{hline 30}           F(  4,  2971) ={res}   70.91
+    {txt}   Model {char |} {res} 4487.59535     4  1121.89884           {txt}Prob > F      = {res} 0.0000
+    {txt}Residual {char |} {res} 47008.6154  2971  15.8224892           {txt}R-squared     = {res} 0.0871
+{txt}{hline 13}{char +}{hline 30}           Adj R-squared = {res} 0.0859
+    {txt}   Total {char |} {res} 51496.2108  2975  17.3096507           {txt}Root MSE      = {res} 3.9777
+
+{txt}{hline 13}{c TT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{col 1}      r_cont{col 14}{c |}      Coef.{col 26}   Std. Err.{col 38}      t{col 46}   P>|t|{col 54}     [95% Con{col 67}f. Interval]
+{hline 13}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{space 6}r_enum {c |}
+{space 6}Sally  {c |}{col 14}{res}{space 2}-.0021418{col 26}{space 2} .2300472{col 37}{space 1}   -0.01{col 46}{space 3}0.993{col 54}{space 4}-.4532098{col 67}{space 3} .4489262
+{txt}{space 5}Esther  {c |}{col 14}{res}{space 2}-.0511624{col 26}{space 2} .2317012{col 37}{space 1}   -0.22{col 46}{space 3}0.825{col 54}{space 4}-.5054736{col 67}{space 3} .4031488
+{txt}{space 7}Nina  {c |}{col 14}{res}{space 2} 2.986605{col 26}{space 2} .2248589{col 37}{space 1}   13.28{col 46}{space 3}0.000{col 54}{space 4}  2.54571{col 67}{space 3}   3.4275
+{txt}{space 5}Olivia  {c |}{col 14}{res}{space 2}-.1101113{col 26}{space 2} .2256067{col 37}{space 1}   -0.49{col 46}{space 3}0.626{col 54}{space 4}-.5524726{col 67}{space 3}   .33225
+{txt}{space 12} {c |}
+{space 7}_cons {c |}{col 14}{res}{space 2}  63.0269{col 26}{space 2} .1578522{col 37}{space 1}  399.28{col 46}{space 3}0.000{col 54}{space 4} 62.71739{col 67}{space 3} 63.33642
+{txt}{hline 13}{c BT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{res}{txt}
+{com}. regress r_count i.r_enum
+
+      {txt}Source {c |}       SS       df       MS              Number of obs ={res}    2976
+{txt}{hline 13}{char +}{hline 30}           F(  4,  2971) ={res} 2987.57
+    {txt}   Model {char |} {res} 49107.3715     4  12276.8429           {txt}Prob > F      = {res} 0.0000
+    {txt}Residual {char |} {res} 12208.7575  2971  4.10930917           {txt}R-squared     = {res} 0.8009
+{txt}{hline 13}{char +}{hline 30}           Adj R-squared = {res} 0.8006
+    {txt}   Total {char |} {res}  61316.129  2975  20.6104635           {txt}Root MSE      = {res} 2.0271
+
+{txt}{hline 13}{c TT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{col 1}     r_count{col 14}{c |}      Coef.{col 26}   Std. Err.{col 38}      t{col 46}   P>|t|{col 54}     [95% Con{col 67}f. Interval]
+{hline 13}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{space 6}r_enum {c |}
+{space 6}Sally  {c |}{col 14}{res}{space 2}-.0256567{col 26}{space 2} .1172368{col 37}{space 1}   -0.22{col 46}{space 3}0.827{col 54}{space 4}-.2555303{col 67}{space 3} .2042168
+{txt}{space 5}Esther  {c |}{col 14}{res}{space 2}-.1420043{col 26}{space 2} .1180797{col 37}{space 1}   -1.20{col 46}{space 3}0.229{col 54}{space 4}-.3735306{col 67}{space 3} .0895221
+{txt}{space 7}Nina  {c |}{col 14}{res}{space 2} 9.945985{col 26}{space 2} .1145927{col 37}{space 1}   86.79{col 46}{space 3}0.000{col 54}{space 4} 9.721295{col 67}{space 3} 10.17067
+{txt}{space 5}Olivia  {c |}{col 14}{res}{space 2}-.1323223{col 26}{space 2} .1149739{col 37}{space 1}   -1.15{col 46}{space 3}0.250{col 54}{space 4}-.3577587{col 67}{space 3} .0931142
+{txt}{space 12} {c |}
+{space 7}_cons {c |}{col 14}{res}{space 2} 4.092913{col 26}{space 2} .0804447{col 37}{space 1}   50.88{col 46}{space 3}0.000{col 54}{space 4}  3.93518{col 67}{space 3} 4.250646
+{txt}{hline 13}{c BT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{res}{txt}
+{com}. regress r_bin i.r_enum
+
+      {txt}Source {c |}       SS       df       MS              Number of obs ={res}    2976
+{txt}{hline 13}{char +}{hline 30}           F(  4,  2971) ={res}    0.29
+    {txt}   Model {char |} {res} .292751998     4  .073187999           {txt}Prob > F      = {res} 0.8829
+    {txt}Residual {char |} {res} 743.169614  2971  .250141236           {txt}R-squared     = {res} 0.0004
+{txt}{hline 13}{char +}{hline 30}           Adj R-squared = {res}-0.0010
+    {txt}   Total {char |} {res} 743.462366  2975  .249903316           {txt}Root MSE      = {res} .50014
+
+{txt}{hline 13}{c TT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{col 1}       r_bin{col 14}{c |}      Coef.{col 26}   Std. Err.{col 38}      t{col 46}   P>|t|{col 54}     [95% Con{col 67}f. Interval]
+{hline 13}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{space 6}r_enum {c |}
+{space 6}Sally  {c |}{col 14}{res}{space 2} .0022437{col 26}{space 2} .0289249{col 37}{space 1}    0.08{col 46}{space 3}0.938{col 54}{space 4}-.0544712{col 67}{space 3} .0589587
+{txt}{space 5}Esther  {c |}{col 14}{res}{space 2} .0018898{col 26}{space 2} .0291329{col 37}{space 1}    0.06{col 46}{space 3}0.948{col 54}{space 4}-.0552329{col 67}{space 3} .0590125
+{txt}{space 7}Nina  {c |}{col 14}{res}{space 2}-.0237828{col 26}{space 2} .0282726{col 37}{space 1}   -0.84{col 46}{space 3}0.400{col 54}{space 4}-.0792187{col 67}{space 3}  .031653
+{txt}{space 5}Olivia  {c |}{col 14}{res}{space 2}-.0025109{col 26}{space 2} .0283666{col 37}{space 1}   -0.09{col 46}{space 3}0.929{col 54}{space 4}-.0581311{col 67}{space 3} .0531093
+{txt}{space 12} {c |}
+{space 7}_cons {c |}{col 14}{res}{space 2} .5181102{col 26}{space 2} .0198475{col 37}{space 1}   26.10{col 46}{space 3}0.000{col 54}{space 4}  .479194{col 67}{space 3} .5570265
+{txt}{hline 13}{c BT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{res}{txt}
+{com}. regress r_cat i.r_enum
+
+      {txt}Source {c |}       SS       df       MS              Number of obs ={res}    2691
+{txt}{hline 13}{char +}{hline 30}           F(  4,  2686) ={res}    1.22
+    {txt}   Model {char |} {res} 9.68327237     4  2.42081809           {txt}Prob > F      = {res} 0.3022
+    {txt}Residual {char |} {res}  5351.0042  2686  1.99218325           {txt}R-squared     = {res} 0.0018
+{txt}{hline 13}{char +}{hline 30}           Adj R-squared = {res} 0.0003
+    {txt}   Total {char |} {res} 5360.68748  2690  1.99282062           {txt}Root MSE      = {res} 1.4114
+
+{txt}{hline 13}{c TT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{col 1}       r_cat{col 14}{c |}      Coef.{col 26}   Std. Err.{col 38}      t{col 46}   P>|t|{col 54}     [95% Con{col 67}f. Interval]
+{hline 13}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{space 6}r_enum {c |}
+{space 6}Sally  {c |}{col 14}{res}{space 2} .0300885{col 26}{space 2} .0816289{col 37}{space 1}    0.37{col 46}{space 3}0.712{col 54}{space 4}-.1299734{col 67}{space 3} .1901504
+{txt}{space 5}Esther  {c |}{col 14}{res}{space 2}-.1358491{col 26}{space 2} .1032229{col 37}{space 1}   -1.32{col 46}{space 3}0.188{col 54}{space 4}-.3382534{col 67}{space 3} .0665553
+{txt}{space 7}Nina  {c |}{col 14}{res}{space 2} .0858995{col 26}{space 2}  .079788{col 37}{space 1}    1.08{col 46}{space 3}0.282{col 54}{space 4}-.0705525{col 67}{space 3} .2423515
+{txt}{space 5}Olivia  {c |}{col 14}{res}{space 2}-.0082102{col 26}{space 2} .0800533{col 37}{space 1}   -0.10{col 46}{space 3}0.918{col 54}{space 4}-.1651825{col 67}{space 3} .1487622
+{txt}{space 12} {c |}
+{space 7}_cons {c |}{col 14}{res}{space 2}        3{col 26}{space 2} .0560116{col 37}{space 1}   53.56{col 46}{space 3}0.000{col 54}{space 4}  2.89017{col 67}{space 3}  3.10983
+{txt}{hline 13}{c BT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{res}{txt}
+{com}. 
+. // QUESTION 9: ARE THERE ANY SIGNFICANT ENUMERATOR FIXED EFFECTS? WHICH VARIABLES
+. //             EXHIBIT SIGNIFICANT EFFECTS? WHAT COULD EXPLAIN THEM?
+. // ANSWER: _____________
+. 
+. log close
+      {txt}name:  {res}<unnamed>
+       {txt}log:  {res}C:\Users\cboyer.IPA\Box Sync\cboyer\global_staff_training\new_hampshire_2015\surveyCTO\exercises\4_data_quality\2_lab_answers\data and do-files\8.6 adv hfc modified template.smcl
+  {txt}log type:  {res}smcl
+ {txt}closed on:  {res}19 Aug 2015, 14:02:26
+{txt}{.-}
+{smcl}
+{txt}{sf}{ul off}

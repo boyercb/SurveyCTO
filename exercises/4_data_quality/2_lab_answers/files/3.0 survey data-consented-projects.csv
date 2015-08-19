@@ -1,0 +1,12 @@
+projectname,projectfield,projectfield_other,projectstatus,projectdqa,PARENT_KEY,KEY,SET-OF-projects
+EUI,1,"",3,1,uuid:7dd7691d-0f2d-4492-bf5e-afbb3a628892,uuid:7dd7691d-0f2d-4492-bf5e-afbb3a628892/consented-projects[1],uuid:7dd7691d-0f2d-4492-bf5e-afbb3a628892/consented-projects
+GN,2,"",2,0,uuid:7dd7691d-0f2d-4492-bf5e-afbb3a628892,uuid:7dd7691d-0f2d-4492-bf5e-afbb3a628892/consented-projects[2],uuid:7dd7691d-0f2d-4492-bf5e-afbb3a628892/consented-projects
+CHW,2,"",2,999,uuid:7dd7691d-0f2d-4492-bf5e-afbb3a628892,uuid:7dd7691d-0f2d-4492-bf5e-afbb3a628892/consented-projects[3],uuid:7dd7691d-0f2d-4492-bf5e-afbb3a628892/consented-projects
+Important project,2,"",3,1,uuid:254b7ab1-dc75-494b-9e5f-c64cc64d92ba,uuid:254b7ab1-dc75-494b-9e5f-c64cc64d92ba/consented-projects[1],uuid:254b7ab1-dc75-494b-9e5f-c64cc64d92ba/consented-projects
+MRB,4,"",3,1,uuid:430ad73e-dabc-4de2-9f6f-81367f32926f,uuid:430ad73e-dabc-4de2-9f6f-81367f32926f/consented-projects[1],uuid:430ad73e-dabc-4de2-9f6f-81367f32926f/consented-projects
+Compartamos,4,"",3,999,uuid:430ad73e-dabc-4de2-9f6f-81367f32926f,uuid:430ad73e-dabc-4de2-9f6f-81367f32926f/consented-projects[2],uuid:430ad73e-dabc-4de2-9f6f-81367f32926f/consented-projects
+KLPS,other,Everything,2,1,uuid:8579133a-d670-4cc1-af94-0b9d5d856008,uuid:8579133a-d670-4cc1-af94-0b9d5d856008/consented-projects[1],uuid:8579133a-d670-4cc1-af94-0b9d5d856008/consented-projects
+TUP,4,"",2,1,uuid:52facf1e-aff3-445c-98c1-1cba8d6e86b0,uuid:52facf1e-aff3-445c-98c1-1cba8d6e86b0/consented-projects[1],uuid:52facf1e-aff3-445c-98c1-1cba8d6e86b0/consented-projects
+DIRTS,1,"",2,1,uuid:52facf1e-aff3-445c-98c1-1cba8d6e86b0,uuid:52facf1e-aff3-445c-98c1-1cba8d6e86b0/consented-projects[2],uuid:52facf1e-aff3-445c-98c1-1cba8d6e86b0/consented-projects
+Secret project,2,"",2,999,uuid:515c6e56-a019-4627-923e-7edd51e58e33,uuid:515c6e56-a019-4627-923e-7edd51e58e33/consented-projects[1],uuid:515c6e56-a019-4627-923e-7edd51e58e33/consented-projects
+TCAI,3,"",3,1,uuid:c59e57fe-e506-4c65-b1b7-b1addf1b95d8,uuid:c59e57fe-e506-4c65-b1b7-b1addf1b95d8/consented-projects[1],uuid:c59e57fe-e506-4c65-b1b7-b1addf1b95d8/consented-projects

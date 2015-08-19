@@ -1,0 +1,27 @@
+Matt White
+Innovations for Poverty Action
+January 14, 2014
+
+You can now find -odkmeta- on SSC. If you never installed -odkmeta- before it was on SSC, type the following in Stata for the latest version:
+
+ssc install odkmeta, replace
+
+If you installed -odkmeta- before it was on SSC, type the following in Stata for the latest version:
+
+capture erase "`c(sysdir_personal)'odkmeta.ado"
+capture erase "`c(sysdir_personal)'odkmeta.sthlp"
+ssc install odkmeta, replace
+
+Description of -odkmeta-:
+
+odkmeta creates a do-file to import ODK data, using the metadata from the survey and choices worksheets of the XLSForm. The do-file completes the following tasks in order:
+
+o Import lists as value labels
+o Add other values to value labels
+o Import field attributes as characteristics
+o Split select_multiple variables
+o Drop note variables
+o Format date, time, and datetime variables
+o Attach value labels
+o Attach field labels as variable labels and notes
+o Merge repeat groups

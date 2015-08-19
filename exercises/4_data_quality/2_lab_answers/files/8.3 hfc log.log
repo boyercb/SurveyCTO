@@ -1,0 +1,65 @@
+-------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\cboyer.IPA\Box Sync\cboyer\global_staff_training\new_hampshire_2015\s
+> urveyCTO\SurveyCTO\Sessions\4 - Data quality\01 Lab work\data and do-files\8.3 hfc log.lo
+> g
+  log type:  text
+ opened on:  18 Aug 2015, 10:21:20
+
+. 
+. *set your current directory to your truecrypt container 
+. *noting that this is a a bad practice (use master do-file, global macro for path, and rel
+> ative file paths)
+. cd "C:\Users\cboyer.IPA\Box Sync\cboyer\global_staff_training\new_hampshire_2015\surveyCT
+> O\SurveyCTO\Sessions\4 - Data quality\01 Lab work\data and do-files"  
+C:\Users\cboyer.IPA\Box Sync\cboyer\global_staff_training\new_hampshire_2015\surveyCTO\Surv
+> eyCTO\Sessions\4 - Data quality\01 Lab work\data and do-files
+
+. 
+. *import your odk survey data 
+.  use "3.0 survey data.dta"  
+
+. 
+. *check for and display duplicate IDs 
+.  duplicates tag KEY, generate (dup) 
+
+Duplicates in terms of KEY
+
+.  display "Displaying unique ID duplicates:"
+Displaying unique ID duplicates:
+
+.  sort consentedid starttime 
+
+.  list consentedid starttime if dup > 0
+
+.   
+. *tabulate responses to your select_one fruit question, check for fair distribution 
+.  tab consentedfavfruit
+
+ What is your ONE |
+ favorite kind of |
+   fruit from the |
+          options |
+       presented? |      Freq.     Percent        Cum.
+------------------+-----------------------------------
+            Mango |          1       11.11       11.11
+           Banana |          3       33.33       44.44
+        Pineapple |          2       22.22       66.67
+          Tomato  |          1       11.11       77.78
+            Apple |          2       22.22      100.00
+------------------+-----------------------------------
+            Total |          9      100.00
+
+. 
+. *save and replace your checked data, and clear stata 
+.  save "8.2 survey data, checked.dta", replace
+(note: file 8.2 survey data, checked.dta not found)
+file 8.2 survey data, checked.dta saved
+
+.  
+.  clear 
+
+. 
+end of do-file
+
+. exit, clear
