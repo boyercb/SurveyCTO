@@ -21,6 +21,27 @@ cd "???"             // REPLACE ??? with the directory
 use "???", clear     // REPLACE ??? with the data set
 
 log using "8.6 adv hfc modified template.smcl", replace
+/* overview of the data set
+
+              storage  display     value
+variable name   type   format      label       variable label
+------------------------------------------------------------
+id              float   %9.0g                  Unique identifier
+r_enum          float   %9.0g      enumerators Survey enumerator
+r_cat           float   %9.0g                  Example categorical variable
+r_cont          float   %9.0g                  Example continuous variable
+r_count         float   %9.0g                  Example count variable
+r_bin           float   %9.0g                  Example binary variable
+r_tx            float   %9.0g      tx          Treatment group
+starttime       float   %tc                    Interview start time
+endtime         float   %tc                    Interview end time
+duration        float   %9.0g                  Duration of interview (min)
+consent         float   %9.0g      lconsent    Did respondent provide consent?
+comment         str33   %33s                   Enumerator comments
+
+------------------------------------------------------------
+
+*/
 
 ///////////////////////////////////////////////////////////////////////////
 ///////////////////// Part 1: Interview Completeness //////////////////////
